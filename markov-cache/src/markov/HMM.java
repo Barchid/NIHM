@@ -41,6 +41,7 @@ public class HMM {
 
 	int cpt = 0;
 	int resamplingPeriod = 20;
+	boolean hasPostProcessing = true;
 
 	HMM() {
 		gestureClasses = new Vector<String>();
@@ -126,17 +127,20 @@ public class HMM {
 			double scoreClass = g.computeScore(featuresRawPoints);
 			// System.out.println(gestureClasses.get(c) + " " + scoreClass);
 
-			boolean isOk = this.postProcessing(g);
+			boolean isOk = true;
+
+			// Activer ou pas le post processing ?
+			if (this.hasPostProcessing) {
+				// Post processing sur le rÃ©sultat
+				isOk = this.postProcessing(g);
+			}
 
 			// SI [je ne passe pas le post processing]
 			if (!isOk) {
-				// ALORS [j'évite le faux positif]
-				System.out.println("\n" + g.gestureClassName + " --> NON");
+				// ALORS [j'ï¿½vite le faux positif]
 				continue;
 			} else {
-				System.out.println("\n" + g.gestureClassName + " --> OUI");
-				
-				// Ajouter la proba si elle a passé le post process 
+				// Ajouter la proba si elle a passï¿½ le post process
 				gesturesProbabilities.add(new GestureProbability(g.gestureClassName, scoreClass));
 				if (scoreClass > score) {
 					score = scoreClass;
@@ -152,16 +156,15 @@ public class HMM {
 
 	/**
 	 * Effectue le post-processing en comparant les distances du premier au dernier
-	 * point pour la séquence observée (resampledPoints) et celle de la GestureClass
+	 * point pour la sï¿½quence observï¿½e (resampledPoints) et celle de la GestureClass
 	 * 
 	 * @param g
 	 * @return true si la gestureClass passe le test de distance des points
-	 *         normalisés
+	 *         normalisï¿½s
 	 */
 	private boolean postProcessing(GestureClass g) {
-		// Distance normalisée de la séquence observée
+		// Distance normalisï¿½e de la sï¿½quence observï¿½e
 		double distObservee = this.getDistanceNormalisee(this.resampledRawPoints);
-		System.out.println("Observee norm " + distObservee);
 
 		// POUR CHAQUE template de la GestureClass
 		for (Template t : g.examples) {
@@ -171,10 +174,9 @@ public class HMM {
 			}
 
 			double distTemplate = this.getDistanceNormalisee(templatePoints);
-			System.out.println("dist tmplt pour " + g.gestureClassName + " : " + distTemplate);
 
-			// La distance des points normalisés de la séquence observée doit être celle de
-			// la distance normalisée du template (à un dixième près)
+			// La distance des points normalisï¿½s de la sï¿½quence observï¿½e doit ï¿½tre celle de
+			// la distance normalisï¿½e du template (ï¿½ un dixiï¿½me prï¿½s)
 			if (distObservee >= distTemplate - 0.1 && distObservee <= distTemplate + 0.1) {
 				return true;
 			}
@@ -184,14 +186,14 @@ public class HMM {
 	}
 
 	/**
-	 * Retourne la distance normalisee entre 0 et 1 de la séquence de points
-	 * observés
+	 * Retourne la distance normalisee entre 0 et 1 de la sï¿½quence de points
+	 * observï¿½s
 	 * 
 	 * @param points
 	 * @return
 	 */
 	private double getDistanceNormalisee(Vector<Point2D> points) {
-		// récupérer les limites du pattern
+		// rï¿½cupï¿½rer les limites du pattern
 		double minX = points.firstElement().getX();
 		double maxX = points.firstElement().getX();
 		double minY = points.firstElement().getY();
@@ -271,26 +273,37 @@ public class HMM {
 	}
 
 	public void setRawSourcePoints(Vector<PointData> rawPoints) {
-		/*
-		 * writeRawPoints2XMLFile("soleil",rawSrcPoints); cpt++;
-		 * System.out.println(cpt);
-		 */
-
 		rawSrcPoints = rawPoints;
 		resampledRawPoints = resample(rawPoints, resamplingPeriod);
+		
+//		writeRawPoints2XMLFile("lune", this.rawSrcPoints);
+//		this.cpt++;
+//		System.out.println(this.cpt);
 	}
 
 	public void TestAllExamples() {
 		int cpt = 0;
 		int good = 0;
+
+		// POUR CHAQUE [gestureClass]
 		for (int c = 0; c < gestureClasses.size(); c++) {
 			GestureClass gestClass = classMap.get(gestureClasses.get(c));
+
+			// POUR CHAQUE [exemple de chaque template de Gesture class]
 			for (int i = 0; i < gestClass.getNumberExamples(); i++) {
-				rawSrcPoints = gestClass.examples.get(i).getPoints();
+
+				// Les raw points Ã  dÃ©tecter deviennent les
+				this.rawSrcPoints = gestClass.examples.get(i).getPoints();
+				this.resampledRawPoints = this.resample(this.rawSrcPoints, this.resamplingPeriod);
+
+				// lancer la reconnaissance sur le template
 				recognize();
-				if (gestureClasses.get(c).compareTo(getNameTemplateFound()) == 0)
+
+				// SI [la classe trouvÃ©e est la bonne]
+				if (gestureClasses.get(c).compareTo(getNameTemplateFound()) == 0) {
 					good++;
-				else
+					System.out.println("GOOD - " + gestureClasses.get(c) + " example num " + i);
+				} else
 					System.out.println("Bad - " + gestureClasses.get(c) + " example num " + i);
 				cpt++;
 			}
@@ -311,21 +324,21 @@ public class HMM {
 			return features;
 		}
 
-		// point précédent pour calculer l'angle
+		// point prï¿½cï¿½dent pour calculer l'angle
 		Point2D precedent = points.get(0);
 
 		// POUR CHAQUE [point]
 		for (int i = 1; i < points.size(); i++) {
 			Point2D courant = points.get(i);
 
-			// CALCULER [la feature à base de l'angle entre la droite precedent-courant et
+			// CALCULER [la feature ï¿½ base de l'angle entre la droite precedent-courant et
 			// l'horizontle
 			double feature = this.angleFeature(precedent, courant);
 
 			// AJOUTER aux features
 			features.add(feature);
 
-			// Précédent devient le courant pour le prochain point
+			// Prï¿½cï¿½dent devient le courant pour le prochain point
 			precedent = courant;
 		}
 
@@ -333,12 +346,12 @@ public class HMM {
 	}
 
 	/**
-	 * Donne la valeur absolue de l'angle formé par la droite AB et l'horizontal à
-	 * 10 degrés près
+	 * Donne la valeur absolue de l'angle formï¿½ par la droite AB et l'horizontal ï¿½
+	 * 10 degrï¿½s prï¿½s
 	 * 
 	 * @param a
 	 * @param b
-	 * @return valeur absolue de l'angle à 10 degrés près (de 0 à 180)
+	 * @return valeur absolue de l'angle ï¿½ 10 degrï¿½s prï¿½s (de 0 ï¿½ 180)
 	 */
 	private double angleFeature(Point2D a, Point2D b) {
 		return Math.round(Math.abs(Math.toDegrees((Math.atan2(b.getY() - a.getY(), b.getX() - a.getX()))))) / 10;
@@ -364,6 +377,7 @@ public class HMM {
 			out.write("	</template>\n");
 			out.close();
 		} catch (Exception e) {// Catch exception if any
+			e.printStackTrace();
 			System.err.println("Error: " + e.getMessage());
 		}
 
@@ -404,7 +418,7 @@ public class HMM {
 		double sumY = 0;
 		int nbPtInterval = 0; // nombre de point dans l'intervalle de temps deltaMS
 
-		// POUR CHAQUE [point] (ils sont déjà triés par timestamp)
+		// POUR CHAQUE [point] (ils sont dï¿½jï¿½ triï¿½s par timestamp)
 		for (PointData pt : pts) {
 			// SI [on est toujours dans l'intervalle deltaMS]
 			if (pt.getTimeStamp() <= currentInterval + deltaTms) {
@@ -425,7 +439,7 @@ public class HMM {
 			}
 		}
 
-		// Ajout du dernier point (dans le cas où l'intervalle ne se finit pas dans la
+		// Ajout du dernier point (dans le cas oï¿½ l'intervalle ne se finit pas dans la
 		// boucle)
 		Point2D resampledPoint = new Point2D((sumX / nbPtInterval), (sumY / nbPtInterval));
 		res.add(resampledPoint);

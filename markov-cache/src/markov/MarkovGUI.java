@@ -60,7 +60,7 @@ public class MarkovGUI extends Application{
 				TresampledPoints = hmm.getResampledPoints();
 				hmm.recognize();
 				console = hmm.getRecognitionInfo();
-				//hmm.TestAllExamples();
+				hmm.TestAllExamples();
 				redrawMyCanvas();
 			}
 		});

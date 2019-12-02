@@ -46,22 +46,22 @@ public class GestureClass {
 	public void computeKmeansLearner() {
 		obsVectors = new ArrayList<ArrayList<ObservationInteger>>();
 
-		// POUR CHAQUE [exemple] du template (but : on génère une séquence
+		// POUR CHAQUE [exemple] du template (but : on gï¿½nï¿½re une sï¿½quence
 		// d'observations pour chaque exemple fourni)
 		for (int i = 0; i < examples.size(); i++) {
 
 			ArrayList<ObservationInteger> obs = new ArrayList<ObservationInteger>();
 
-			// Récupérer les features de l'exemple (
+			// Rï¿½cupï¿½rer les features de l'exemple (
 			Vector<Double> f = examples.get(i).getFeaturesVector();
 
 			// POUR CHAQUE [feature] DE [exemple]
 			for (int j = 0; j < f.size(); j++) {
-				// AJOUTER [feature] DANS [la séquence d'observations de l'exemple]
+				// AJOUTER [feature] DANS [la sï¿½quence d'observations de l'exemple]
 				obs.add(new ObservationInteger(f.get(j).intValue()));
 			}
 
-			// Ajouter la séquence d'obersations trouvée
+			// Ajouter la sï¿½quence d'obersations trouvï¿½e
 			obsVectors.add(obs);
 		}
 
@@ -70,7 +70,7 @@ public class GestureClass {
 		// kmeanslearner = new KMeansLearner(2, new OpdfIntegerFactory(19), obsVectors);
 		// hmm = kmeanslearner.learn();
 
-		// Obtenir un HMM entrainé via l'algorithme de Baum Welch (K-means sert ici à
+		// Obtenir un HMM entrainï¿½ via l'algorithme de Baum Welch (K-means sert ici ï¿½
 		// identifier
 		hmm = trainHMM(obsVectors);
 	}
@@ -131,16 +131,16 @@ public class GestureClass {
 	}
 
 	/**
-	 * Calcule la probabilité que la chaîne d'observations en paramètre soit liée à
-	 * la GestureClass grâce à sa HMM en utilisant l'algo du Forward-Backward
+	 * Calcule la probabilitï¿½ que la chaï¿½ne d'observations en paramï¿½tre soit liï¿½e ï¿½
+	 * la GestureClass grï¿½ce ï¿½ sa HMM en utilisant l'algo du Forward-Backward
 	 * 
-	 * @param featuresRawPoints la séquence observée
-	 * @return la probabilité que la HMM de la GestureClass courante génère la séquence observée en paramètres
+	 * @param featuresRawPoints la sï¿½quence observï¿½e
+	 * @return la probabilitï¿½ que la HMM de la GestureClass courante gï¿½nï¿½re la sï¿½quence observï¿½e en paramï¿½tres
 	 */
 	public double computeScore(ArrayList<Double> featuresRawPoints) {
-		double res = 0; // la probabilité recherchée
+		double res = 0; // la probabilitï¿½ recherchï¿½e
 
-		// CONSTRUIRE [la séquence des observations observée] VIA [les features en paramètres]
+		// CONSTRUIRE [la sï¿½quence des observations observï¿½e] VIA [les features en paramï¿½tres]
 		ArrayList<ObservationInteger> obs = new ArrayList<ObservationInteger>();
 		for (Double i : featuresRawPoints) {
 			obs.add(new ObservationInteger(i.intValue()));
