@@ -14,11 +14,14 @@ Ce README contient les réponses des questions demandées lors de ce TP sur les 
 
 - Le post-processing est activé dans le programme. Le programme est donc capable de discriminer des gestes aberrants. 
 
+- Le programme `markov.jar` lit le fichier de gestes `resources/gestures.xml` situé à la racine du projet.
+
 ## Réponses aux questions du TP
 Cette partie présente les réponses aux questions posées dans l'énoncé du TP.
 
 #### Question 3
 > "[...] Quels sont les défauts de la méthode d’extraction proposée ?"
+
 La réflexion d'un geste par rapport à l'axe des X "trompe" la reconnaissance. C'est-à-dire que si je fais une réflexion d'une forme par rapport à l'axe des X, mon programme reconnaitra exactement la même forme que si c'était à l'endroit.
 
 Un exemple de problème concret que ça engendrerait est : 
