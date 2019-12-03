@@ -137,7 +137,7 @@ public class HMM {
 
 			// SI [je ne passe pas le post processing]
 			if (!isOk) {
-				// ALORS [j'�vite le faux positif]
+				// ALORS [j'évite le faux positif]
 				continue;
 			} else {
 				// Ajouter la proba si elle a pass� le post process
@@ -324,7 +324,7 @@ public class HMM {
 			return features;
 		}
 
-		// point pr�c�dent pour calculer l'angle
+		// point précédent pourr calculer l'angle
 		Point2D precedent = points.get(0);
 
 		// POUR CHAQUE [point]
