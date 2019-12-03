@@ -25,6 +25,8 @@ class SVGShape {
   
   void draw() {
     fill(this.col);
+    strokeWeight(5);
+    stroke(0);
     shapeMode(CENTER);
     shape(s, x, y, extent, extent);
   }

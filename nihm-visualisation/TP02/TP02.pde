@@ -1,4 +1,5 @@
 //globally
+import java.util.*;
 
 //declare the min and max variables that you need in parseInfo
 float minX, maxX;
@@ -28,12 +29,15 @@ float xList[];
 float yList[];
 City[] cities;
 
+// Zoom à la souris
+int zoom = 100; // au début = 100%
+
 PShape star, skull, hexagone, losange, triangle;
 
+ZoomMouseMap zoomer = new ZoomMouseMap();
+
 void setup() {
-  size(800,800);
-  readData();
-  print(minPopulation);
+  size(1500,900);
   
   // Charger les images SVG
   star = loadSVG("star.svg");
@@ -41,6 +45,8 @@ void setup() {
   hexagone = loadSVG("hexagone.svg");
   losange = loadSVG("losange.svg");
   triangle = loadSVG("triangle.svg");
+  
+  readData();
 }
 
 PShape loadSVG(String file) {
@@ -50,21 +56,29 @@ PShape loadSVG(String file) {
 }
 
 void draw(){
+  colorMode(RGB, 255);
   background(255);
+  colorMode(HSB, 360, 100, 100);
   //in your draw method
   for (int i = 0 ; i < totalCount-2 ; i++) {
-    //cities[i].drawPoint();
-    //cities[i].drawSurfaceDensity();
-    //cities[i].drawSurfacePopulation();
-    //cities[i].drawSurfaceAltitude();
-    cities[i].drawSurfacePopulationColor();
+    cities[i].drawWithoutShape();
   }
   
-  SVGShape s = new SVGShape(100,100,50, color(255,0,0), losange);
-  s.draw();
+  // dessiner le cadre de zoom
+  zoomer.draw();
   
-  s = new SVGShape(150,100,50, color(255,0,0), triangle);
-  s.draw();
+  // Tracer des lignes pour délimiter
+  stroke(0);
+  strokeWeight(2);
+  line(0, 805, 805, 805);
+  line(805, 0, 805, 805);
+  line(805, 200, 1200, 200);
+  line(1200, 0, 1200, 200);
+  
+  // Texte pour indiquer le zoom
+  colorMode(RGB);
+  fill(0);
+  text("Zoom : " + zoom + "%", 10, 850);
 }
 
 void readData() {
@@ -72,7 +86,7 @@ void readData() {
   parseInfo(lines[0]); // read the header line
   
   // tableau des villes
-  cities = new City[totalCount];
+  cities = new City[totalCount - 2];
   
   for (int i = 2 ; i < totalCount ; ++i) {
     String[] cols = split(lines[i], TAB);
@@ -91,6 +105,9 @@ void readData() {
   
   // Trouver les densités max et min parmis les villes du fichier
   findMinMaxDensities();
+  
+  // Trier par population (voir le compareTo de la class "City")
+  Arrays.sort(cities);
 }
 
 void parseInfo(String line) {
@@ -134,5 +151,13 @@ void findMinMaxDensities() {
      if(minDensity > city.density) {
        minDensity = city.density;
      }
+  }
+}
+
+void mouseWheel(MouseEvent event) {
+  float e = event.getCount();
+  
+  if(e < 0 && zoom < 350 || e > 0 && zoom > 50) {
+    zoom -= int(e);
   }
 }
