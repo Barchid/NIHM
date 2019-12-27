@@ -28,59 +28,82 @@ int IND_ALTITUDE = 7;
 float xList[];
 float yList[];
 City[] cities;
+City firstQuartile; // Ville qui est le premier 
 
-// Zoom à la souris
-int zoom = 100; // au début = 100%
-
+// Les formes pour la classification
 PShape star, skull, hexagone, losange, triangle;
 
-ZoomMouseMap zoomer = new ZoomMouseMap();
+// Déclaration des widgets
+ZoomMouseMap zoomMouseMap;
+MainMap mainMap;
 
 void setup() {
-  size(1500,900);
+  size(1500,950);
   
-  // Charger les images SVG
+  // Charger les images SVG pour les formes
   star = loadSVG("star.svg");
   skull = loadSVG("skull.svg");
   hexagone = loadSVG("hexagone.svg");
   losange = loadSVG("losange.svg");
   triangle = loadSVG("triangle.svg");
   
+  // Charger les données TSV 
   readData();
-}
-
-PShape loadSVG(String file) {
-  PShape svg = loadShape(file);
-  svg.disableStyle();
-  return svg;
+  
+  // Créer les widgets
+  mainMap = new MainMap(new PVector(0,0), new PVector(800,800), cities);
+  zoomMouseMap = new ZoomMouseMap(new PVector(805, 0), new PVector(1305, 500), mainMap, cities);
 }
 
 void draw(){
   colorMode(RGB, 255);
   background(255);
-  colorMode(HSB, 360, 100, 100);
-  //in your draw method
-  for (int i = 0 ; i < totalCount-2 ; i++) {
-    cities[i].drawWithoutShape();
-  }
   
-  // dessiner le cadre de zoom
-  zoomer.draw();
+  // Dessin de l'intérieur des widgets
+  mainMap.draw();
+  zoomMouseMap.draw();
   
-  // Tracer des lignes pour délimiter
-  stroke(0);
-  strokeWeight(2);
-  line(0, 805, 805, 805);
-  line(805, 0, 805, 805);
-  line(805, 200, 1200, 200);
-  line(1200, 0, 1200, 200);
-  
-  // Texte pour indiquer le zoom
+  // Dessin des frontières des widgets
+  noFill();
   colorMode(RGB);
-  fill(0);
-  text("Zoom : " + zoom + "%", 10, 850);
+  stroke(0);
+  strokeWeight(1);
+  mainMap.drawBorders();
+  zoomMouseMap.drawBorders();
 }
 
+
+
+
+// ########################################################################
+// Callbacks
+// ########################################################################
+void mouseWheel(MouseEvent event) {
+  mainMap.mouseWheel(event);
+}
+
+void mouseClicked() {
+  mainMap.mouseClicked();
+}
+
+void mousePressed() {
+  mainMap.mousePressed();
+}
+
+void mouseReleased(){
+ mainMap.mouseReleased(); 
+}
+
+void mouseDragged() {
+ mainMap.mouseDragged(); 
+}
+
+
+
+
+// ########################################################################
+// Lecture des données
+// ########################################################################
 void readData() {
   String[] lines = loadStrings("../villes.tsv");
   parseInfo(lines[0]); // read the header line
@@ -94,8 +117,8 @@ void readData() {
     cities[i-2] = new City(
       int(cols[IND_POSTAL]),
       cols[IND_PLACE],
-      int(mapX(float(cols[IND_X]))),
-      int(mapY(float(cols[IND_Y]))),
+      float(cols[IND_X]),
+      float(cols[IND_Y]),
       float(cols[IND_POPULATION]),
       float(cols[IND_POPULATION]) / float(cols[IND_SURFACE]), // density à calculer
       float(cols[IND_SURFACE]),
@@ -126,14 +149,6 @@ void parseInfo(String line) {
   maxAltitude = int(infoPieces[10]);
 }
 
-float mapX(float x) {
- return map(x, minX, maxX, 0, 800);
-}
-
-float mapY(float y) {
- return map(y, minY, maxY, 800, 0);
-}
-
 void findMinMaxDensities() {
   maxDensity = 0;
   minDensity = 1000000;
@@ -154,10 +169,21 @@ void findMinMaxDensities() {
   }
 }
 
-void mouseWheel(MouseEvent event) {
-  float e = event.getCount();
-  
-  if(e < 0 && zoom < 350 || e > 0 && zoom > 50) {
-    zoom -= int(e);
-  }
+
+
+// ########################################################################
+// Fonctions utilitaires générales
+// ########################################################################
+float mapX(float x, float newMin, float newMax) {
+ return map(x, minX, maxX, newMin, newMax);
+}
+
+float mapY(float y, float newMin, float newMax) {
+ return map(y, minY, maxY, newMax, newMin);
+}
+
+PShape loadSVG(String file) {
+  PShape svg = loadShape(file);
+  svg.disableStyle();
+  return svg;
 }
