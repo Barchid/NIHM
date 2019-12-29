@@ -1,0 +1,11 @@
+Participant	Technique	Distance	Taille	Densité	Direction	Block	Trial
+P1	Baseline	10	2	8.61	Gauche	0	0
+P1	Baseline	10	2	8.61	Droite	0	1
+P1	Baseline	10	2	8.61	Gauche	0	2
+P1	Baseline	10	2	8.61	Droite	0	3
+P1	Baseline	10	2	8.61	Gauche	0	4
+P1	Baseline	10	2	8.61	Droite	1	0
+P1	Baseline	10	2	8.61	Gauche	1	1
+P2	Baseline	10	2	8.61	Gauche	1	1
+P3	Baseline	10	2	8.61	Gauche	1	1
+P4	Baseline	10	2	8.61	Gauche	1	1

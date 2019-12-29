@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html style="height: 100%;">
+
+<head>
+
+	<title>EXPE</title>
+
+	<!-- Librairie SVG -->
+	<script src="https://cdn.jsdelivr.net/npm/@svgdotjs/svg.js@3.0/dist/svg.min.js"></script>
+
+	<!-- Librairies utilitaires -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/6.2.5/math.js"></script>
+
+	<!-- Fichiers propres à l'expérience -->
+	<script src="moteur.js"></script>
+	<script src="logging.js"></script>
+
+</head>
+
+<body style="width: 100%; height: 100%; cursor: none;">
+
+	<!-- Interface de sélection de fichier de scénario et de participant -->
+	<input type='file' onchange='lireScenario(event)' value='test.tsv'>
+	Participant : <select name='Participant' id='Plist' onchange='chargerParticipant(event)'></select><br>
+
+	<!-- Interface de téléchargement des logs, à la fin de l'expé. -->
+	<a id="logButton" href="#">Fichier de logs</a>&nbsp;
+	<a id="kinematicButton" href="#">Fichier de cinématiques</a>
+
+	<script type="text/javascript">
+
+		// Initialisation du canvas SVG
+		var canvas = SVG().addTo('body').size('100%', '100%');
+
+
+		/********** CURSOR **********/
+
+		// Dimensions des barres du curseur
+		const CursorShort = 3;
+		const CursorLong = 30;
+
+		// Le curseur est un groupe constitué de deux rectangles.
+		const c1 = canvas.rect(CursorShort, CursorLong).dmove(-CursorShort / 2, -CursorLong / 2);
+		const c2 = canvas.rect(CursorLong, CursorShort).dmove(-CursorLong / 2, -CursorShort / 2);
+		var cursor = canvas.group().add(c1).add(c2)
+
+		// Position de départ du curseur
+		var CurrentX = 100;
+		var CurrentY = 100;
+		cursor.cx(CurrentX).cy(CurrentY);
+		//cursor.move(CurrentX, CurrentY);
+
+		// Permet de "transférer" les événements curseur (système) en-dessous de l'objet "curseur"
+		cursor.css('pointer-events', 'none');
+
+		// Déplacements du curseur par défaut
+		canvas.mousemove(function (evt) {
+			CurrentX = evt.offsetX;
+			CurrentY = evt.offsetY;
+			cursor.cx(CurrentX).cy(CurrentY);
+			//cursor.move(evt.offsetX - CursorLong / 2, evt.offsetY - CursorLong / 2);
+		});
+
+
+		/********** TARGETS **********/
+
+		// Liste des cibles actuellement affichées
+		var CurrentTargets = [];
+
+		// Couleurs par défaut
+		let TargetColor = '#1E1';
+		let DistractorColor = '#666';
+		let HoverColor = '#EE1';
+
+		class Target {
+
+			constructor(x, y, width, distractor) {
+
+				this.x = x;
+				this.y = y;
+				this.width = width;
+				this.isDistractor = distractor;
+
+				this.svg = canvas.rect(width, width).move(x - width / 2, y - width / 2);
+
+				// Gestions des couleurs des cibles
+
+				this.defaultColor = distractor ? DistractorColor : TargetColor;
+				this.svg.fill(this.defaultColor);
+
+				this.svg.mouseover((function (evt) {
+					this.svg.fill({ color: HoverColor });
+					this.svg.stroke({ color: '#f06', opacity: 1 });
+				}).bind(this)); // -> astuce pour pouvoir utiliser "this" dans le bon scope
+
+				this.svg.mouseout((function (evt) {
+					if(evt instanceof MouseEvent && Bubble) {
+						return;
+					}
+					this.svg.fill({ color: this.defaultColor });
+					this.svg.stroke({ color: '#f06', opacity: 0 });
+				}).bind(this)); // -> même chose
+
+				CurrentTargets.push(this);
+
+				cursor.front(); // Permet de garder le curseur toujours au premier plan.
+
+			}
+
+		}
+
+		// // Exemples...
+		
+
+		// Typiquement, au moment de changer de trial.
+		function clearCanvas() {
+			for (let i = 0; i < CurrentTargets.length; i++) {
+				CurrentTargets[i].svg.remove();
+			}
+			CurrentTargets = [];
+		}
+
+		/********** BUBBLE CURSOR **********/
+
+		let Bubble = true;
+		let CurrentSelection = null;
+
+		const circle = Bubble ? canvas.circle(1).fill({ color: '#f06', opacity: 0.5 }) : null;
+
+		canvas.mousemove(function (evt) {
+
+			if (Bubble) {
+
+				// D'abord on cherche la cible la plus proche du curseur
+
+				let closestTarget = CurrentTargets[0];
+				let minDist = math.distance([CurrentX, CurrentY], [closestTarget.x, closestTarget.y]);
+
+				for (let i = 1; i < CurrentTargets.length; i++) {
+
+					let t = CurrentTargets[i];
+					let currentDistance = math.distance([CurrentX, CurrentY], [t.x, t.y]);
+					if (currentDistance < minDist) {
+						minDist = currentDistance;
+						closestTarget = t;
+					}
+				}
+
+				// L'idée est de provoquer les mêmes comportements que ceux par défaut quand on survole une cible.
+
+				if (CurrentSelection === null) {
+					CurrentSelection = closestTarget;
+					CurrentSelection.svg.fire('mouseover');
+				}
+				else if (closestTarget !== CurrentSelection) {
+					CurrentSelection.svg.fire('mouseout');
+					CurrentSelection = closestTarget;
+					CurrentSelection.svg.fire('mouseover');
+				}
+
+				// ICI, je vais mettre une bulle
+				circle.radius(minDist);
+				circle.cx(CurrentX).cy(CurrentY);
+			}
+
+		});
+
+		/* TODO feedback visuel du Bubble Cursor (voir https://www.youtube.com/watch?v=JUBXkD_8ZeQ) */
+
+
+		/********** CLIC **********/
+
+		canvas.click(function (evt) {
+			/* TODO que doit-il se passer au clic ?
+				- selon la technique ?
+				- quoi logguer ?
+			*/
+		});
+
+
+		/********** ENREGISTREMENT DES LOGS **********/
+
+		document.getElementById('logButton').onclick = function (event) {
+			blob = new Blob(Resultats);
+			url = window.URL.createObjectURL(blob);
+
+			this.href = url;
+			this.target = '_blank';
+
+			// target filename
+			this.download = 'logs.tsv';
+		}
+
+		document.getElementById('kinematicButton').onclick = function (event) {
+			blob = new Blob(Cinematiques);
+			url = window.URL.createObjectURL(blob);
+
+			this.href = url;
+			this.target = '_blank';
+
+			// target filename
+			this.download = 'cinematiques.tsv';
+		}
+
+	</script>
+
+</body>
+
+</html>
