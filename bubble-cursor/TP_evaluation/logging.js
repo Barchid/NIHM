@@ -19,14 +19,34 @@ function initLogs() {
 
 }
 
+function initResultats() {
+	Resultats[0] += '\t' + 'Erreurs' // nombre d'erreurs
+	Resultats[0] += '\t' + 'Temps' // temps pris
+}
+
+function initCinematiques() {
+	
+}
+
 function logEvent(values) {
 
 	/* TODO Ajouter un événement aux logs cinématiques. Tous les champs doivent être remplis. */
 
 }
 
-function logTrial(values) {
-
-	/* TODO Ajouter un trial aux logs principaux. Tous les champs doivent être remplis. */
-
+function logTrial(trial) {
+	const diff = new Date().getTime() - startDate.getTime();
+	const logInfo = [
+		currentParticipant,
+		trial.Technique,
+		trial.Distance,
+		trial.Taille,
+		trial.Densite,
+		trial.Direction,
+		trial.Bloc,
+		trial.Trial,
+		nbErrors,
+		diff
+	]
+	Resultats.push(logInfo.join('\t'))
 }

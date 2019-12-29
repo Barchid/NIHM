@@ -67,8 +67,11 @@ function lireScenario(event) {
 // Participant courant
 let currentParticipant;
 
-// Timestamp de début du trial
-let startTS;
+// Date de début du trial courant
+let startDate;
+
+// nombre d'erreurs enregistrées pour le trial courant
+let nbErrors;
 
 // tableau des trials pour le participant courant
 let participantTrials;
@@ -80,20 +83,14 @@ let trialIndex;
 const pxMM = 5;
 
 function chargerParticipant() {
+	clearCanvas()
 	currentParticipant = getSelectedParticipant()
 	participantTrials = loadParticipantTrials()
-	trialIndex = 0;
-	new Target(100, 100, 50, true);
-	new Target(100, 200, 50, true);
-	new Target(300, 200, 50, true);
-	new Target(300, 400, 50, false);
-	new Target(500, 400, 50, true);
-
+	trialIndex = 0
+	loadTrial()
 }
 
 function trialSuivant() {
-
-	alert("TODO trialSuivant()");
 	/* TODO fonction à appeler pour passer au trial suivant.
 		- Logguer les résultats
 		- Vérifier qu'il ne s'agit pas du dernier trial pour ce participant
@@ -105,6 +102,7 @@ function trialSuivant() {
 		alert("FIN pour le participant " + currentParticipant);
 	}
 
+
 }
 
 
@@ -113,18 +111,87 @@ function trialSuivant() {
 
 function loadTrial() {
 	const trial = participantTrials[trialIndex];
-	const T = trial.Taille * pxMM; // longueur d'un cube en px
-	const D = (trial.Densite/100) * T; // distance D de la densité en px
-	const zone = 500 + T; // taille de la zone où sont dessinés les cibles
-	const A = trial.Distance * pxMM; 
+	Technique = trial.Technique;
+	
+	infos = drawScene(trial, 200, calculateX0(trial));
+	findCible(infos);
+
+	nbErrors = 0;
+
+	// nouvelle date !!!
+	startDate = new Date();
+}
+
+// Fonction qui désigne la cible à sélectionner parmis les distracteurs tracés
+function findCible(infos) {
+	let inLine;
+	let inCol;
+
+	if(infos.nbSquares % 2 == 1) {
+		inLine =  ((infos.nbLines - 1) / 2) * infos.nbSquares;
+		inCol = (infos.nbSquares - 1) / 2;
+	}
+	else {
+		inLine = (infos.nbLines / 2) * infos.nbSquares
+		inCol = (infos.nbSquares / 2) - 1
+	}
+
+
+	const indexCible = Math.round(inLine + inCol);
+	CurrentTargets[indexCible].isDistractor = false;
+	CurrentTargets[indexCible].defaultColor = TargetColor;
+	CurrentTargets[indexCible].svg.fill(TargetColor)
+}
+
+/**
+ * Fonction ayant pour but de calculer le x0 pour placer la scène du trial et le retourne
+ * @param {any} trial 
+ */
+function calculateX0(trial) {
+	// SI [c'est le premier trial que l'on gère] (le curseur n'est pas encore placé donc c'est un cas particulier)
+	if(trialIndex == 0) {
+		// je me place en fonction du sens de la scène qui va suivre
+		return participantTrials[(trialIndex+1)].Direction == 'R' ?
+			100 :
+			900
+	}
+
+	// distance du curseur requise
+	const A = trial.Distance * pxMM
+
+	// SI [il faut placer la scene à gauche]
+	if(trial.Direction === "L") {
+		return CurrentX - A
+	}
+	// SINON [il fajut placer la scène à droite]
+	else {
+		return CurrentX + A
+	}
 }
 
 /**
  * Fonction qui dessine le canvas à utiliser pour le trial courant
  * @param {*} trial 
  */
-function drawScene(trial) {
-	
+function drawScene(trial, y0, x0) {
+	const T = trial.Taille * pxMM; // longueur d'un cube en px
+	const D = (trial.Densite/100) * T; // distance D de la densité en px
+	const zone = 500 + T; // taille de la zone où sont dessinés les cibles
+	let y = y0;
+	let nbLines = 0;
+	let nbSquares = 0;
+	let canDraw = true;
+	while(canDraw) {
+		nbSquares = drawRows(trial, y, x0);
+		nbLines++;
+		canDraw = y + T + D <= y0 + zone;
+		y += D + T;
+	}
+
+	return {
+		nbSquares,
+		nbLines
+	};
 }
 
 /**
@@ -138,16 +205,19 @@ function drawRows(trial, y, x0) {
 	const D = (trial.Densite/100) * T; // distance D de la densité en px
 	const zone = 500 + T; // taille de la zone où sont dessinés les cibles
 	let x = x0;
+	let nbSquares = 0;
 
 	// TANT QUE [je peux dessiner un carré]
 	let canDraw = true;
 	while(canDraw) {
 		// ALORS [je dessine une target]
 		new Target(x, y, T, true);
+		nbSquares++;
 
-		canDraw = x + T + D <= zone;
+		canDraw = x + T + D <= x0 + zone;
 		x+= D + T;
 	}
+	return nbSquares;
 }
 
 /**

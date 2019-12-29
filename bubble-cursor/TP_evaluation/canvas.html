@@ -88,15 +88,24 @@
 				this.defaultColor = distractor ? DistractorColor : TargetColor;
 				this.svg.fill(this.defaultColor);
 
+				const self = this;
 				this.svg.mouseover((function (evt) {
 					this.svg.fill({ color: HoverColor });
 					this.svg.stroke({ color: '#f06', opacity: 1 });
+					if(Technique == "S") {
+						CurrentSelection = self;
+					}
 				}).bind(this)); // -> astuce pour pouvoir utiliser "this" dans le bon scope
 
 				this.svg.mouseout((function (evt) {
-					if(evt instanceof MouseEvent && Bubble) {
+					if(evt instanceof MouseEvent && Technique != "S") {
 						return;
 					}
+
+					if(Technique == "S") {
+						CurrentSelection = null;
+					}
+
 					this.svg.fill({ color: this.defaultColor });
 					this.svg.stroke({ color: '#f06', opacity: 0 });
 				}).bind(this)); // -> même chose
@@ -118,22 +127,36 @@
 				CurrentTargets[i].svg.remove();
 			}
 			CurrentTargets = [];
+
+			if(line) {
+				line.remove();
+				line = null;
+			}
+
+			if(circle) {
+				circle.remove();
+				circle = null;
+			}
 		}
 
-		/********** BUBBLE CURSOR **********/
+		/********** BUBBLE & LINE CURSOR **********/
 
-		let Bubble = true;
+		let Technique = "S";
 		let CurrentSelection = null;
 
-		const circle = Bubble ? canvas.circle(1).fill({ color: '#f06', opacity: 0.5 }) : null;
+		let circle = null;
+		let line = null;
 
 		canvas.mousemove(function (evt) {
-
-			if (Bubble) {
+			if (Technique != "S") {
 
 				// D'abord on cherche la cible la plus proche du curseur
 
 				let closestTarget = CurrentTargets[0];
+				if(closestTarget == null) {
+					return;
+				}
+				
 				let minDist = math.distance([CurrentX, CurrentY], [closestTarget.x, closestTarget.y]);
 
 				for (let i = 1; i < CurrentTargets.length; i++) {
@@ -158,19 +181,31 @@
 					CurrentSelection.svg.fire('mouseover');
 				}
 
-				// ICI, je vais mettre une bulle
-				circle.radius(minDist);
-				circle.cx(CurrentX).cy(CurrentY);
+				// SI [on est en mode bubble]
+				if(Technique == "B") {
+					if(!circle) {
+						circle = canvas.circle(1).fill({ color: '#f06', opacity: 0.5 })
+					}
+					// ICI, je vais mettre une bulle
+					circle.radius(minDist);
+					circle.cx(CurrentX).cy(CurrentY);
+				}
+				// SINON (on est en mode "line")
+				else {
+					if(line) {
+						line.remove();
+					}
+
+					line = canvas.line(CurrentX, CurrentY, CurrentSelection.x, CurrentSelection.y).stroke({color: '#f06', opacity: 0.5, width: 15});
+				}
 			}
 
 		});
 
-		/* TODO feedback visuel du Bubble Cursor (voir https://www.youtube.com/watch?v=JUBXkD_8ZeQ) */
-
-
 		/********** CLIC **********/
 
 		canvas.click(function (evt) {
+			console.log(CurrentSelection)
 			/* TODO que doit-il se passer au clic ?
 				- selon la technique ?
 				- quoi logguer ?
