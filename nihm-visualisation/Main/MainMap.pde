@@ -53,6 +53,10 @@ class MainMap extends RectWidget {
         continue;
       }
 
+      if(!this.isShapeFiltered(this.cities[i])) {
+        continue;
+      }
+
       // Dessin de la ville
 
       // SI [j'ai beaucoup zoomé] (genre 300% ou +)
@@ -70,6 +74,34 @@ class MainMap extends RectWidget {
       }
     }
     this.focusedCity = cityHoveredIndex == -1 ? null : this.cities[cityHoveredIndex];
+  }
+
+  private boolean isShapeFiltered(City city) {
+    if (city.population < 10) {
+      return filters.ghostDisplayed;
+    }
+
+    if (city.population < 2000) {
+      return filters.villageDisplayed;
+    }
+
+    if (city.population < 5000) {
+      return filters.bourgDisplayed;
+    }
+
+    if (city.population < 20000) {
+      return filters.petiteVilleDisplayed;
+    }
+
+    if (city.population < 50000) {
+      return filters.moyenneVilleDisplayed;
+    }
+
+    if (city.population < 200000) {
+      return filters.grandeVilleDisplayed;
+    }
+
+    return filters.metropoleDisplayed;
   }
 
   // Calcul la coordonnée en X de la ville pour le zoom et le panCenter courant

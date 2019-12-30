@@ -39,8 +39,6 @@ class FilterShapes extends RectWidget {
     this.grandeVilleBox.draw();
     this.metropoleBox.draw();
     
-    // draw
-    
     // draw le texte
     colorMode(RGB);
     fill(0);
@@ -52,6 +50,16 @@ class FilterShapes extends RectWidget {
     text("Moyenne ville ( >= 20k et < 50k habitants)", 830, 705);
     text("Grande ville ( >= 50k et < 200k habitants)", 830, 740);
     text("Metropole ( >= 200k habitants", 830, 775);
+    
+    // draw les formes
+    shapeMode(CENTER);
+    this.drawShape(1100, 565, skull);
+    circle(1100, 600, 12);
+    square(1093, 628, 12);
+    this.drawShape(1100, 670, triangle);
+    this.drawShape(1100, 705, losange);
+    this.drawShape(1100, 740, hexagone);
+    this.drawShape(1100, 775, star);
   }
   
   private void updateFlags() {
@@ -76,8 +84,6 @@ class FilterShapes extends RectWidget {
   }
   
   void drawShape(int x, int y, PShape s) {
-    fill(color(0));
-    shapeMode(CENTER);
-    shape(s, x, y, 10, 10);
+    shape(s, x, y, 15, 15);
   }
 }
