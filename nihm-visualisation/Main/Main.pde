@@ -34,48 +34,54 @@ City firstQuartile; // Ville qui est le premier
 PShape star, skull, hexagone, losange, triangle;
 
 // Déclaration des widgets
-ZoomMouseMap zoomMouseMap;
 MainMap mainMap;
-PopulationSlider populationSlider;
-PopulationSlider altitudeSlider;
+Scrollbar popMinScroll;
+Scrollbar popMaxScroll;
+Scrollbar altMinScroll;
+Scrollbar altMaxScroll;
 
 void setup() {
-  size(1500,950);
-  
+  size(1500, 950);
+
   // Charger les images SVG pour les formes
   star = loadSVG("star.svg");
   skull = loadSVG("skull.svg");
   hexagone = loadSVG("hexagone.svg");
   losange = loadSVG("losange.svg");
   triangle = loadSVG("triangle.svg");
-  
+
   // Charger les données TSV 
   readData();
-  
+
   // Créer les widgets
-  mainMap = new MainMap(new PVector(0,0), new PVector(800,800), cities);
-  zoomMouseMap = new ZoomMouseMap(new PVector(805, 0), new PVector(1305, 500), mainMap, cities);
-  populationSlider = new PopulationSlider(new PVector(805, 0), new PVector(1005, 400), cities);
-  altitudeSlider = new PopulationSlider(new PVector(1010, 0), new PVector(1210, 400), cities);
+  mainMap = new MainMap(new PVector(0, 0), new PVector(800, 800), cities);
+  popMinScroll = new Scrollbar(new PVector(805, 10), new PVector(1450, 60), minPopulation, maxPopulation, false);
+  popMaxScroll = new Scrollbar(new PVector(805, 70), new PVector(1450, 120), minPopulation, maxPopulation, true);
+  altMinScroll = new Scrollbar(new PVector(805, 130), new PVector(1450, 180), minAltitude, maxAltitude, false);
+  altMaxScroll = new Scrollbar(new PVector(805, 190), new PVector(1450, 240), minAltitude, maxAltitude, true);
 }
 
-void draw(){
+void draw() {
   colorMode(RGB, 255);
   background(255);
-  
+
   // Dessin de l'intérieur des widgets
   mainMap.draw();
-  populationSlider.draw();
-  altitudeSlider.draw();
-  
+  popMinScroll.draw();
+  popMaxScroll.draw();
+  altMinScroll.draw();
+  altMaxScroll.draw();
+
   // Dessin des frontières des widgets
   noFill();
   colorMode(RGB);
   stroke(0);
   strokeWeight(1);
   mainMap.drawBorders();
-  populationSlider.drawBorders();
-  altitudeSlider.drawBorders();
+  popMinScroll.drawBorders();
+  popMaxScroll.drawBorders();
+  altMinScroll.drawBorders();
+  altMaxScroll.drawBorders();
 }
 
 
@@ -94,14 +100,26 @@ void mouseClicked() {
 
 void mousePressed() {
   mainMap.mousePressed();
+  popMinScroll.mousePressed();
+  popMaxScroll.mousePressed();
+  altMinScroll.mousePressed();
+  altMaxScroll.mousePressed();
 }
 
-void mouseReleased(){
- mainMap.mouseReleased(); 
+void mouseReleased() {
+  mainMap.mouseReleased();
+  popMinScroll.mouseReleased();
+  popMaxScroll.mouseReleased();
+  altMinScroll.mouseReleased();
+  altMaxScroll.mouseReleased();
 }
 
 void mouseDragged() {
- mainMap.mouseDragged(); 
+  mainMap.mouseDragged(); 
+  popMinScroll.mouseDragged();
+  popMaxScroll.mouseDragged();
+  altMinScroll.mouseDragged();
+  altMaxScroll.mouseDragged();
 }
 
 
@@ -113,28 +131,28 @@ void mouseDragged() {
 void readData() {
   String[] lines = loadStrings("../villes.tsv");
   parseInfo(lines[0]); // read the header line
-  
+
   // tableau des villes
   cities = new City[totalCount - 2];
-  
-  for (int i = 2 ; i < totalCount ; ++i) {
+
+  for (int i = 2; i < totalCount; ++i) {
     String[] cols = split(lines[i], TAB);
-    
+
     cities[i-2] = new City(
-      int(cols[IND_POSTAL]),
-      cols[IND_PLACE],
-      float(cols[IND_X]),
-      float(cols[IND_Y]),
-      float(cols[IND_POPULATION]),
+      int(cols[IND_POSTAL]), 
+      cols[IND_PLACE], 
+      float(cols[IND_X]), 
+      float(cols[IND_Y]), 
+      float(cols[IND_POPULATION]), 
       float(cols[IND_POPULATION]) / float(cols[IND_SURFACE]), // density à calculer
-      float(cols[IND_SURFACE]),
+      float(cols[IND_SURFACE]), 
       float(cols[IND_ALTITUDE])
-    );
+      );
   }
-  
+
   // Trouver les densités max et min parmis les villes du fichier
   findMinMaxDensities();
-  
+
   // Trier par population (voir le compareTo de la class "City")
   Arrays.sort(cities);
 }
@@ -158,20 +176,20 @@ void parseInfo(String line) {
 void findMinMaxDensities() {
   maxDensity = 0;
   minDensity = 1000000;
-  for (int i = 0 ; i < totalCount-2 ; i++) {
-     City city = cities[i];
-     
-     if(city.surface == 0){
-       continue;
-     }
-     
-     if(maxDensity < city.density) {
-       maxDensity = city.density;
-     }
-     
-     if(minDensity > city.density) {
-       minDensity = city.density;
-     }
+  for (int i = 0; i < totalCount-2; i++) {
+    City city = cities[i];
+
+    if (city.surface == 0) {
+      continue;
+    }
+
+    if (maxDensity < city.density) {
+      maxDensity = city.density;
+    }
+
+    if (minDensity > city.density) {
+      minDensity = city.density;
+    }
   }
 }
 
@@ -181,11 +199,11 @@ void findMinMaxDensities() {
 // Fonctions utilitaires générales
 // ########################################################################
 float mapX(float x, float newMin, float newMax) {
- return map(x, minX, maxX, newMin, newMax);
+  return map(x, minX, maxX, newMin, newMax);
 }
 
 float mapY(float y, float newMin, float newMax) {
- return map(y, minY, maxY, newMax, newMin);
+  return map(y, minY, maxY, newMax, newMin);
 }
 
 PShape loadSVG(String file) {

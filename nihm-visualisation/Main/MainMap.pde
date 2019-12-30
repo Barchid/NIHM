@@ -34,6 +34,17 @@ class MainMap extends RectWidget {
         continue;
       }
       
+      // Filtre des populations suivant l'histogramme
+      boolean isPopulationFiltered = this.cities[i].population >= popMinScroll.currentValue && this.cities[i].population <= popMaxScroll.currentValue;
+      if(!isPopulationFiltered) {
+        continue;
+      }
+      
+      boolean isAltitudeFiltered = this.cities[i].altitude >= altMinScroll.currentValue && this.cities[i].altitude <= altMaxScroll.currentValue;
+      if(!isAltitudeFiltered) {
+        continue;
+      }
+      
       // Dessin de la ville
       
       // SI [j'ai beaucoup zoomé] (genre 300% ou +)
