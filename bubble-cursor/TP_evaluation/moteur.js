@@ -83,7 +83,6 @@ let trialIndex;
 const pxMM = 5;
 
 function chargerParticipant() {
-	clearCanvas()
 	currentParticipant = getSelectedParticipant()
 	participantTrials = loadParticipantTrials()
 	trialIndex = 0
@@ -97,12 +96,13 @@ function trialSuivant() {
 		- Nettoyer le canvas
 		- Générer un nouveau canvas à partir des paramètres du trial
 	*/
-
+	logTrial(participantTrials[trialIndex]);
+	clearCanvas();
 	if(trialIndex >= participantTrials.length-1) {
 		alert("FIN pour le participant " + currentParticipant);
 	}
-
-
+	trialIndex++;
+	loadTrial();
 }
 
 
@@ -110,6 +110,9 @@ function trialSuivant() {
 // FONCTIONS UTILITAIRES
 
 function loadTrial() {
+	clearCanvas();
+	writeTrialNumberInfo();
+
 	const trial = participantTrials[trialIndex];
 	Technique = trial.Technique;
 	
@@ -151,22 +154,30 @@ function calculateX0(trial) {
 	// SI [c'est le premier trial que l'on gère] (le curseur n'est pas encore placé donc c'est un cas particulier)
 	if(trialIndex == 0) {
 		// je me place en fonction du sens de la scène qui va suivre
-		return participantTrials[(trialIndex+1)].Direction == 'R' ?
-			100 :
-			900
+		return 100;
 	}
 
 	// distance du curseur requise
 	const A = trial.Distance * pxMM
-
+	let x0;
 	// SI [il faut placer la scene à gauche]
-	if(trial.Direction === "L") {
-		return CurrentX - A
+	if(CurrentX < 800) {
+		x0 = CurrentX + A
 	}
 	// SINON [il fajut placer la scène à droite]
 	else {
-		return CurrentX + A
+		x0 = CurrentX - A
 	}
+
+	// Correction si jamais on dépasse l'écran
+	if(x0 < 0) {
+		x0 = 100;
+	}
+	if(x0 >= 1450) {
+		x0 = 1200;
+	}
+
+	return x0;
 }
 
 /**
@@ -238,7 +249,6 @@ function loadParticipantTrials() {
 				"Distance" : Trials["Distance"][i],
 				"Taille": Trials["Taille"][i],
 				"Densite": Trials["Densite"][i],
-				"Direction": Trials["Direction"][i],
 				"Bloc": Trials["Bloc"][i],
 				"Trial": Trials["Trial"][i],
 			})
@@ -246,4 +256,8 @@ function loadParticipantTrials() {
 	}
 
 	return result;
+}
+
+function writeTrialNumberInfo() {
+	document.getElementById('js-info-nombre-trial').innerText = 'Nombre de trials : ' + (trialIndex + 1) + ' / ' + participantTrials.length;
 }

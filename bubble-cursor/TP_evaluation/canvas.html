@@ -26,6 +26,7 @@
 	<!-- Interface de téléchargement des logs, à la fin de l'expé. -->
 	<a id="logButton" href="#">Fichier de logs</a>&nbsp;
 	<a id="kinematicButton" href="#">Fichier de cinématiques</a>
+	<span id="js-info-nombre-trial"></span>
 
 	<script type="text/javascript">
 
@@ -205,11 +206,19 @@
 		/********** CLIC **********/
 
 		canvas.click(function (evt) {
-			console.log(CurrentSelection)
 			/* TODO que doit-il se passer au clic ?
 				- selon la technique ?
 				- quoi logguer ?
 			*/
+
+			// SI [erreur]
+			if(!CurrentSelection || CurrentSelection.isDistractor) {
+				nbErrors++;
+			}
+			// SINON
+			else {
+				trialSuivant();
+			}
 		});
 
 

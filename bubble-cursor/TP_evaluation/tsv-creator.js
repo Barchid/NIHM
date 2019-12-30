@@ -1,6 +1,20 @@
-A = [100, 200, 50]
-T = [20, 10, 5, 2.5]
-D = [20, 100, 200, 50]
+// A = [100, 200, 50]
+// T = [20, 10, 5, 2.5]
+// D = [20, 100, 200, 50]
+// P = [
+//     "Sami Barchid",
+//     "Anthony Beuchey",
+//     "Vérane Martin",
+//     "Loris Pace",
+//     "Eryne Martin",
+//     "Antony Slimani"
+// ]
+
+// N = 5
+
+A = [100]
+T = [5]
+D = [100]
 P = [
     "Sami Barchid",
     "Anthony Beuchey",
@@ -10,7 +24,7 @@ P = [
     "Antony Slimani"
 ]
 
-N = 5
+N = 3
 
 function shuffle(array) {
     array.sort(() => Math.random() - 0.5);
@@ -18,7 +32,7 @@ function shuffle(array) {
 
 const scenario = [];
 
-console.log("Participant\tTechnique\tDistance\tTaille\tDensite\tDirection\tBloc\tTrial")
+console.log("Participant\tTechnique\tDistance\tTaille\tDensite\tBloc\tTrial")
 for (let p of P) {
     const participant = []
     let blockNum = 0
@@ -35,7 +49,6 @@ for (let p of P) {
                             a,
                             t,
                             d,
-                            i % 2 == 0 ? "L" : "R",
                             blockNum * 3,
                             i
                         ]
@@ -49,7 +62,6 @@ for (let p of P) {
                             a,
                             t,
                             d,
-                            i % 2 == 0 ? "L" : "R",
                             blockNum * 3 + 1,
                             i
                         ]
@@ -63,7 +75,6 @@ for (let p of P) {
                             a,
                             t,
                             d,
-                            i % 2 == 0 ? "L" : "R",
                             blockNum * 3 + 2,
                             i
                         ]
@@ -82,8 +93,7 @@ for (let p of P) {
             pp[3] + "\t" +
             pp[4] + "\t" +
             pp[5] + "\t" +
-            pp[6] + "\t" +
-            pp[7]
+            pp[6]
         )
     }
 }

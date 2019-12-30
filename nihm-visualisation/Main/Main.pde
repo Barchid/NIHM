@@ -28,7 +28,7 @@ int IND_ALTITUDE = 7;
 float xList[];
 float yList[];
 City[] cities;
-City firstQuartile; // Ville qui est le premier 
+City firstQuartile; // Ville qui est le premier
 
 // Les formes pour la classification
 PShape star, skull, hexagone, losange, triangle;
@@ -36,6 +36,8 @@ PShape star, skull, hexagone, losange, triangle;
 // Déclaration des widgets
 ZoomMouseMap zoomMouseMap;
 MainMap mainMap;
+PopulationSlider populationSlider;
+PopulationSlider altitudeSlider;
 
 void setup() {
   size(1500,950);
@@ -53,6 +55,8 @@ void setup() {
   // Créer les widgets
   mainMap = new MainMap(new PVector(0,0), new PVector(800,800), cities);
   zoomMouseMap = new ZoomMouseMap(new PVector(805, 0), new PVector(1305, 500), mainMap, cities);
+  populationSlider = new PopulationSlider(new PVector(805, 0), new PVector(1005, 400), cities);
+  altitudeSlider = new PopulationSlider(new PVector(1010, 0), new PVector(1210, 400), cities);
 }
 
 void draw(){
@@ -61,7 +65,8 @@ void draw(){
   
   // Dessin de l'intérieur des widgets
   mainMap.draw();
-  zoomMouseMap.draw();
+  populationSlider.draw();
+  altitudeSlider.draw();
   
   // Dessin des frontières des widgets
   noFill();
@@ -69,7 +74,8 @@ void draw(){
   stroke(0);
   strokeWeight(1);
   mainMap.drawBorders();
-  zoomMouseMap.drawBorders();
+  populationSlider.drawBorders();
+  altitudeSlider.drawBorders();
 }
 
 

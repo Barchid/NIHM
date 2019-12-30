@@ -16,12 +16,13 @@ function initLogs() {
 	Cinematiques.push(ParamNamesInOrder.join('\t'));
 
 	/* TODO colonnes supplémentaires (mesures, etc.) */
+	initResultats();
 
 }
 
 function initResultats() {
 	Resultats[0] += '\t' + 'Erreurs' // nombre d'erreurs
-	Resultats[0] += '\t' + 'Temps' // temps pris
+	Resultats[0] += '\t' + 'Temps\n' // temps pris
 }
 
 function initCinematiques() {
@@ -49,4 +50,5 @@ function logTrial(trial) {
 		diff
 	]
 	Resultats.push(logInfo.join('\t'))
+	Resultats[Resultats.length - 1] += '\n'
 }

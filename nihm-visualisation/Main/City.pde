@@ -76,11 +76,11 @@ class City implements Comparable {
       
       // C'est un village --> cercle
       if(this.population < 2000) {
-        circle(coordX, coordY, this.extent);
+        circle(coordX, coordY, 1.5*this.extent);
       }
       // C'est un bourg --> carré
       else {
-        square(coordX, coordY, this.extent);
+        square(coordX, coordY, 1.5*this.extent);
       }
     }
     else {
