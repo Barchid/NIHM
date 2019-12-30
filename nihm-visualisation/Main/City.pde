@@ -67,8 +67,24 @@ class City implements Comparable {
     if (this.population >= 10 && this.population < 5000 ) {
       strokeWeight(1);
       stroke(0);
-      colorMode(HSB, 360, 100, 100, 100);
-      fill(this.c);
+      if (this == mainMap.clickedCity) {
+        colorMode(RGB, 255, 255, 255, 100);
+        fill(color(59, 59, 152));
+        textSize(20);
+        text(this.name, coordX+this.extent, coordY);
+
+        fill(color(59, 59, 152, this.alpha));
+      } else if (this == mainMap.focusedCity) {
+        colorMode(RGB, 255, 255, 255, 100);
+        fill(color(33, 140, 116));
+        textSize(20);
+        text(this.name, coordX + this.extent, coordY);
+
+        fill(color(33, 140, 116, this.alpha));
+      } else {
+        colorMode(HSB, 360, 100, 100, 100);
+        fill(this.c);
+      }
 
       // C'est un village --> cercle
       if (this.population < 2000) {
@@ -79,7 +95,25 @@ class City implements Comparable {
         square(coordX, coordY, 1.5*this.extent);
       }
     } else {
-      this.svg.draw(coordX, coordY);
+      if (this == mainMap.clickedCity) {
+        colorMode(RGB, 255, 255, 255, 100);
+        color cust = color(59, 59, 152);
+        this.svg.drawWithColor(coordX, coordY, cust);
+        textSize(20);
+        text(this.name, coordX+this.extent, coordY);
+
+        fill(color(59, 59, 152, this.alpha));
+      } else if (this == mainMap.focusedCity) {
+        colorMode(RGB, 255, 255, 255, 100);
+        color cust = color(33, 140, 116);
+        this.svg.drawWithColor(coordX, coordY, cust);
+        textSize(20);
+        text(this.name, coordX + this.extent, coordY);
+
+        fill(color(33, 140, 116, this.alpha));
+      } else {
+        this.svg.draw(coordX, coordY);
+      }
     }
   }
 
@@ -89,10 +123,43 @@ class City implements Comparable {
     strokeWeight(1);
     stroke(0);
 
-    colorMode(HSB, 360, 100, 100, 100);
-    fill(this.c);
+    // Choix de la couleur suivant le focus et le clicked
+    if (this == mainMap.clickedCity) {
+      colorMode(RGB, 255, 255, 255, 100);
+      fill(color(59, 59, 152));
+      textSize(20);
+      text(this.name, coordX+this.extent, coordY);
+
+      fill(color(59, 59, 152, this.alpha));
+    } else if (this == mainMap.focusedCity) {
+      colorMode(RGB, 255, 255, 255, 100);
+      fill(color(33, 140, 116));
+      textSize(20);
+      text(this.name, coordX + this.extent, coordY);
+
+      fill(color(33, 140, 116, this.alpha));
+    } else {
+      colorMode(HSB, 360, 100, 100, 100);
+      fill(this.c);
+    }
 
     // C'est un village --> cercle
     circle(coordX, coordY, this.extent);
+  }
+
+  // Fonction qui renvoie true si le curseur est contenu dans le dessin de la ville pour un zoom donné (comme ça on sait si les formes sont affichées ou pas)
+  boolean isOver(int coordX, int coordY) {
+    // SI [les formes sont affichées]
+    if (mainMap.zoom >= 300) {
+      if (this.population >= 10 && this.population < 5000) {
+        return dist(coordX, coordY, mouseX, mouseY) <= (1.5*this.extent) / 2 + 1;
+      } else {
+        return dist(coordX, coordY, mouseX, mouseY) <= this.extent + 1;
+      }
+    }
+    // SINON (on n'affiche que des cercles
+    else {
+      return dist(coordX, coordY, mouseX, mouseY) <= this.extent/2 + 1;
+    }
   }
 }

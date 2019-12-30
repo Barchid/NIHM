@@ -50,7 +50,10 @@ class Scrollbar extends RectWidget {
       int valToDisplay = int(map(x, this.topLeft.x, this.bottomRight.x, this.minValue, this.maxValue));
 
       if (i % 2 == 0) {
-        text("" + valToDisplay, x, this.bottomRight.y - 5);
+        text("" + valToDisplay, x, this.bottomRight.y - 3);
+      }
+      else {
+        text("" + valToDisplay, x, this.topLeft.y + 7); 
       }
         
       x += step;

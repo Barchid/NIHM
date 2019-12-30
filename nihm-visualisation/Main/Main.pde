@@ -39,6 +39,7 @@ Scrollbar popMinScroll;
 Scrollbar popMaxScroll;
 Scrollbar altMinScroll;
 Scrollbar altMaxScroll;
+FilterShapes filters;
 
 void setup() {
   size(1500, 950);
@@ -55,10 +56,11 @@ void setup() {
 
   // Créer les widgets
   mainMap = new MainMap(new PVector(0, 0), new PVector(800, 800), cities);
-  popMinScroll = new Scrollbar(new PVector(805, 10), new PVector(1450, 60), minPopulation, maxPopulation, false);
-  popMaxScroll = new Scrollbar(new PVector(805, 70), new PVector(1450, 120), minPopulation, maxPopulation, true);
-  altMinScroll = new Scrollbar(new PVector(805, 130), new PVector(1450, 180), minAltitude, maxAltitude, false);
-  altMaxScroll = new Scrollbar(new PVector(805, 190), new PVector(1450, 240), minAltitude, maxAltitude, true);
+  popMinScroll = new Scrollbar(new PVector(805, 100), new PVector(1450, 150), minPopulation, maxPopulation, false);
+  popMaxScroll = new Scrollbar(new PVector(805, 200), new PVector(1450, 250), minPopulation, maxPopulation, true);
+  altMinScroll = new Scrollbar(new PVector(805, 350), new PVector(1450, 400), minAltitude, maxAltitude, false);
+  altMaxScroll = new Scrollbar(new PVector(805, 450), new PVector(1450, 500), minAltitude, maxAltitude, true);
+  filters = new FilterShapes(new PVector(805, 550), new PVector(1200, 780));
 }
 
 void draw() {
@@ -71,6 +73,7 @@ void draw() {
   popMaxScroll.draw();
   altMinScroll.draw();
   altMaxScroll.draw();
+  filters.draw();
 
   // Dessin des frontières des widgets
   noFill();
@@ -82,6 +85,28 @@ void draw() {
   popMaxScroll.drawBorders();
   altMinScroll.drawBorders();
   altMaxScroll.drawBorders();
+  filters.drawBorders();
+  
+  // Dessin des textes
+  // dessin du texte pour informer du zoom
+  fill(0);
+  textSize(15);
+  text("Zoom : " + int(mainMap.zoom) + " %", 5, 820);
+  
+  textSize(12);
+  text("Affichage des formes à partir de 300%", 5, 835);
+  text("Zoom disponible avec scroll et pan navigation disponible", 5, 850);
+  
+  textSize(15);
+  text("Seuil MIN de population : " + int(popMinScroll.currentValue), 805, 90);
+  text("Seuil MAX de population : " + int(popMaxScroll.currentValue), 805, 190);
+  text("Seuil MIN d'altitude : " + int(altMinScroll.currentValue), 805, 340);
+  text("Seuil MAX d'altitude : " + int(altMaxScroll.currentValue), 805, 440);
+  
+  textSize(25);
+  text("Carte des villes de France selon leur nombre d'habitants (en taille) et leur altitude (variation de teinte)", 100, 920);
+  strokeWeight(3);
+  line(100,925, 1330,925);
 }
 
 
@@ -96,6 +121,7 @@ void mouseWheel(MouseEvent event) {
 
 void mouseClicked() {
   mainMap.mouseClicked();
+  filters.mouseClicked();
 }
 
 void mousePressed() {

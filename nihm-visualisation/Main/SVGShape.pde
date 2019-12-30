@@ -25,6 +25,14 @@ class SVGShape {
     shape(s, x, y, extent, extent);
   }
   
+  // Dessine la forme avec une couleur imposée (utilisée pour les villes focused et clicked)
+  void drawWithColor(int x, int y, color imposed) {
+    fill(imposed);
+    this.chooseStrokeWeight();
+    shapeMode(CENTER);
+    shape(s, x, y, extent, extent);
+  }
+  
   // Choisi la strokeWeight appropriée pour que ce soit visible. on fait ça car, suivant le SVG, ça devient compliqu
   private void chooseStrokeWeight() {
     if(this.s == star) {

@@ -6,9 +6,10 @@ class Checkbox {
   Checkbox(int x, int y){
     this.x = x;
     this.y = y;
-    this.b = false;
+    this.b = true;
   }
   void draw(){
+    noFill();
     stroke(0);
     rect(x, y, 20, 20);
     if(b){
