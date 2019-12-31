@@ -155,7 +155,7 @@ void mouseDragged() {
 // Lecture des données
 // ########################################################################
 void readData() {
-  String[] lines = loadStrings("../villes.tsv");
+  String[] lines = loadStrings("./villes.tsv");
   parseInfo(lines[0]); // read the header line
 
   // tableau des villes
