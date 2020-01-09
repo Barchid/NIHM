@@ -1,0 +1,46 @@
+---
+title: "Paired-samples t test"
+author: "Gery Casiez"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(knitr)
+library(pander)
+```
+
+## Paired-samples t test
+
+We have one group of participants typing some text using standard word-processing software and the word-processing software with word-prediction functions.
+
+## Load data
+
+```{r readdata}
+data = read.table("wordProcessingSoftwareWithinSubjectTtest.csv", header=TRUE, sep=",")
+kable(data)
+```
+
+## Transform data
+
+```{r onecol, message=FALSE}
+library(dplyr)
+nopred = t(data$nopred)
+pred = t(data$pred) 
+```
+
+## check normality
+```{r normality}
+library(car)
+pander(shapiro.test(nopred))
+pander(shapiro.test(pred))
+```
+
+
+## t test
+
+```{r ttest}
+pander(t.test(nopred, pred, paired=T))
+```
+
+

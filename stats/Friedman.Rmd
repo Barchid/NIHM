@@ -1,0 +1,31 @@
+---
+title: "Friedman test"
+author: "Gery Casiez"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(knitr)
+library(pander)
+```
+
+## Friedman test
+
+Within-subject, authentication method with 3 techniques
+
+## Load data
+
+```{r readdata}
+data = read.table("authenticationTechniquesWithinSubject3techniques.csv", header=TRUE, sep=",")
+kable(data)
+```
+
+## Test
+
+```{r MUW}
+data$participant = NULL
+pander(friedman.test(data.matrix(data)))
+```
+
+

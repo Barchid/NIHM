@@ -1,0 +1,46 @@
+---
+title: "Independent-samples t test"
+author: "Gery Casiez"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(knitr)
+library(pander)
+```
+
+## Independent-samples t test
+
+We have two groups of participants with one group typing some text using standard word-processing software only and another group using the word-processing software with word-prediction functions.
+
+## Load data
+
+```{r readdata}
+data = read.table("wordProcessingSoftwareBetweenSubjectTtest.csv", header=TRUE, sep=",")
+kable(data)
+```
+
+## Transform data
+
+```{r onecol, message=FALSE}
+library(dplyr)
+nopred = t(data %>% filter(group == 0) %>% select(time))
+pred = t(data %>% filter(group == 1) %>% select(time)) 
+```
+
+## check normality
+```{r normality}
+library(car)
+pander(shapiro.test(nopred))
+pander(shapiro.test(pred))
+```
+
+
+## t test
+
+```{r ttest}
+pander(t.test(nopred, pred, paired=F))
+```
+
+

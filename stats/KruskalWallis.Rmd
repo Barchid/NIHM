@@ -1,0 +1,30 @@
+---
+title: "Kruskal-Wallis test"
+author: "Gery Casiez"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(knitr)
+library(pander)
+```
+
+## Kruskal-Wallis test
+
+Between-subject, authentication method with 3 techniques
+
+## Load data
+
+```{r readdata}
+data = read.table("authenticationTechniquesBetweenSubject3techniques.csv", header=TRUE, sep=",")
+kable(data)
+```
+
+## Test
+
+```{r MUW}
+pander(kruskal.test(rating ~ technique, data=data))
+```
+
+

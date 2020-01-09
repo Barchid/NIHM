@@ -1,0 +1,45 @@
+---
+title: "Mixed-design ANOVA"
+author: "Gery Casiez"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(knitr)
+library(apa)
+```
+
+## Mixed-design ANOVA
+
+Factor 1 (between-subject): task (transcription, composition)
+Factor 2 (within-subject): text entry method (standard word-processing software, text entry using word-prediction software, text entry using speech-based dictation software)
+
+
+## Load data
+
+```{r readdata}
+data = read.table("wordProcessingSoftwareMixedDesignANOVA.csv", header=TRUE, sep=",")
+kable(data)
+```
+
+
+Convert data using the long format
+```{r convertlong, results="hide", message=FALSE}
+library("reshape")
+data.long = melt(data, id = c("participant","textmethod","task","time"))
+```
+
+Indicate what are the independent variables (factors)
+```{r indepvar, results="hide"}
+data.long$textmethod = factor(data.long$textmethod)
+data.long$task = factor(data.long$task)
+```
+
+## ANOVA
+```{r anova}
+library("ez")
+kable(anova_apa(ezANOVA(data.long, dv=.(time), wid=.(participant), between=.(task), within=.(textmethod), detailed=TRUE)))
+```
+
+

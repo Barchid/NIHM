@@ -1,0 +1,52 @@
+---
+title: "Repeated Measures ANOVA"
+author: "Gery Casiez"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(knitr)
+library(apa)
+```
+
+## Repeated Measures ANOVA using 2 factors
+
+Within-subject design 
+Factor 1: text entry method (standard word-processing software, text entry using word-prediction software, text entry using speech-based dictation software)
+Factor 2: task (transcription, composition)
+
+## Load data
+
+```{r readdata}
+data = read.table("wordProcessingSoftwareWithinSubjectRepeatedMeasuresANOVA2factors.csv", header=TRUE, sep=",")
+kable(data)
+```
+
+
+Convert data using the long format
+```{r convertlong, results="hide", message=FALSE}
+library("reshape")
+data.long = melt(data, id = c("participant","textmethod","task","time"))
+```
+
+Indicate what are the independent variables (factors)
+```{r indepvar, results="hide"}
+data.long$textmethod = factor(data.long$textmethod)
+data.long$task = factor(data.long$task)
+```
+
+## ANOVA
+```{r anova}
+library("ez")
+kable(anova_apa(ezANOVA(data.long, dv=.(time), wid=.(participant), within=.(textmethod,task), detailed=TRUE)))
+```
+
+## Pairwise comparisons
+
+```{r posthoc}
+attach(data.long)
+pw <- pairwise.t.test(time, factor(task), paired=T, p.adj = "bonferroni")
+detach(data.long)
+kable(pw$p.value)
+```

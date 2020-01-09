@@ -1,0 +1,187 @@
+---
+title: "Force Edge Experiment - TP"
+output: html_document
+author: "Sami BARCHID"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(knitr)
+library(pander)
+library(apa)
+library(dplyr)
+library(reshape)
+library(ez)
+library(gmodels)
+library(ggplot2)
+```
+
+# 1. Introduction
+On effectue l'analyse statistique de la première expérience étudiée dans l'article de recherche [ForceEdge: Controlling Autoscroll on Both Desktop and Mobile Computers Using the Force](https://hal.inria.fr/hal-01444366/document). On définit ici les constatations que l'on peut faire sur le travail qu'on est amené à faire sur l'expérience.
+
+## 1.1. Caractéristiques de l'expérience
+Les variables indépendantes de l'expérience sont :
+- **"task"** : le type de tâche à réaliser. (**within-subject**)
+  - Il y a **2 niveaux** définis : "select" et "mode".
+- **"technique"** : la technique à utiliser pour réaliser la tâche. (**within-subject**)
+  - Il y a **2 niveaux** définis : *"Baseline"* et *"ForceEdge"*.
+- **"distance"** : la distance utilisée TODO !!!
+  - TODO !!!
+
+Les variables dépendantes principale de l'expérience (càd celles qui sont importantes pour répondre aux hypothèses émises) sont : 
+- **time** : temps mis par le participant pour réaliser la tâche.
+- **overshoot** : la distance d'overshoot = la distance de dépassement enregistrée. 
+
+## 1.2. Test statistique à utiliser
+- On dispose de **deux variables indépendantes**.
+- Le plan d'expérience des deux variables indépendante est en **Within-group**. On a donc un plan d'expérience en **within-group**.
+
+A partir de ces deux constatations, on définit que le test statistique à utiliser est le **Repeated measures ANOVA**.
+
+
+# 2. Réplication des analyses statistiques de l’article ForceEdge
+
+## 2.1. Chargement des données
+Lecture des données du fichier `ForceEdgeStudy1.csv`.
+
+```{r readdata}
+data = read.table("ForceEdgeStudy1.csv", header=TRUE, sep=",")
+#kable(data)
+```
+
+## 2.2. Filtrage et agrégation des données
+
+Conversion des données en format long pour que l'utilisation d'ANOVA fonctionne. C'est une contrainte qu'on ne sait pas pourquoi elle est là en bref...
+```{r convertlong, results="hide", message=FALSE}
+data.long = melt(data, id = c("participant","task", "technique", "block", "distance", "repetition", "trial", "time", "overshoot", "success"))
+```
+
+
+#### 2.2.3. Conserver uniquement les essais réussis
+On opère un filtre sur les données pour ne conserver que les essais qui ont eu un `success = true` (donc qui ont réussi).
+
+```{r filtering_success, message=FALSE}
+successful = data.long %>% filter(success == "True")
+```
+
+#### 2.2.4. Regroupement et calcul d'agrégations
+On recherche maintenant à organiser les données par task, technique et distance et de calculer, pour chaque sous-groupe, le temps moyen ainsi que les bornes inférieures et supérieures des intervalles de confiance à 95%.
+
+Ces bornes inférieures et supérieures des intervalles de confiance à 95% permettent de vérifier que les niveaux d'une variable indépendante influencent les résultats mesurés sur une variable dépendante ou si, au contraire, ça ne change rien.
+
+```{r regroupement, message=FALSE}
+grouped = successful %>%  group_by(task, technique, distance) %>% summarise(meanTime = mean(time), ci.lower = ci(time)["CI lower"], ci.upper = ci(time)["CI upper"])
+
+kable(grouped)
+```
+
+## 2.3. Visualisation
+
+On veut maintenant montrer si le temps moyen d'un essai suivant la technique et la distance utilisée. Pour ce faire, on reproduit la figure 4 à gauche de l'article original.
+  - Le premier graphique montre le temps moyen d'un essai suivant la technique et la distance utilisée pour les tâches de "Move".
+  - Le deuxième graphique montre le temps moyen d'un essai suivant la technique et la distance utilisée pour les tâches de "Select".
+
+```{r plot CI}
+
+# Plot pour la tâche de "Move"
+grouped_move = grouped %>% filter(task == "Move")
+ggplot(grouped_move, aes(x = factor(distance), y = meanTime, group=technique)) +
+      geom_line(aes(colour=technique, linetype=technique)) +
+      ylim(0, 15) +
+      geom_errorbar(aes(ymin = ci.lower, ymax = ci.upper), width = .1, position = position_dodge(.05)) +
+      theme(panel.background = element_blank(),
+            panel.border = element_rect(colour = 'black', fill=NA),
+            panel.grid.major.y = element_line( size = .1, color = "grey")
+      ) +
+      labs(title = "Time (s) for Move", x = "Distance (lines)", y = "Time(s)")
+
+# Plot pour la tâche de "Select"
+grouped_select = grouped %>% filter(task == "Select")
+ggplot(grouped_select, aes(x = factor(distance), y = meanTime, group=technique)) +
+      geom_line(aes(colour=technique, linetype=technique)) +
+      ylim(0, 15) +
+      geom_errorbar(aes(ymin = ci.lower, ymax = ci.upper), width = .1, position = position_dodge(.05)) +
+      theme(panel.background = element_blank(),
+            panel.border = element_rect(colour = 'black', fill=NA),
+            panel.grid.major.y = element_line( size = .1, color = "grey")
+      ) +
+      labs(title = "Time (s) for Move", x = "Distance (lines)", y = "Time(s)")
+```
+
+Avec ces deux graphiques, nous observons ici plusieurs choses :
+- Dans les deux tâches (Move et Select), le temps enregistré ne montre pas de différence significative entre les deux techniques lorsque la distance utilisée est la plus courte.
+- Pour la tâche de Select, on n'observe pas de différence significative entre les deux techniques (Force Edge et Baseline).
+- Dans les autres cas de figure, on observe une différence significative entre les deux techniques.
+
+## 2.4. ANOVA sur le temps
+Dans ce chapitre, on cherche à utiliser la repeated measure ANOVA afin de constater les différences significatives entre les paramètres.
+
+#### 2.4.1. Constater l'effet d'apprentissage
+L'objectif ici est de constater l'effet d'apprentissage observé en montrant la différence significative entre le bloc 1 et les autres. Pour ce faire, on réalise une Repeated Measure ANOVA sur les blocs et sur les autres variables indépendantes. 
+
+```{r bloc_anova}
+# Préparation pour l'ANOVA
+successful$technique = factor(successful$technique)
+successful$task = factor(successful$task)
+successful$distance = factor(successful$distance)
+successful$block = factor(successful$block)
+
+# Lancement de l'ANOVA
+anova_result = ezANOVA(successful, dv=.(time), wid=.(participant), within=.(technique, task, block, distance))
+kable(anova_result$ANOVA)
+#print(anova_result$ANOVA)
+```
+
+L'ANOVA révèle un effet d'apprentissage au vu de l'impact significatif sur le temps passé à faire la tâche ($F_{2,30} = 62.09$, $p < 0.05$).
+
+#### 2.4.2. Analyse des autres variables indépendantes
+Pour éviter le biais dû à l'effet d'apprentissage, on supprime les données du premier bloc dans le but de relancer l'ANOVA et de voir les impacts significatifs pour les autres variables indépendantes.
+
+```{r anova_independant}
+# Filtrage du block 1
+without_block1 = successful %>% filter(block != 1)
+anova_result = ezANOVA(without_block1, dv=.(time), wid=.(participant), within=.(technique, task, block, distance))
+kable(anova_result$ANOVA)
+```
+
+## 2.5. ANOVA sur les questionnaires NASA-TLX
+Dans cette partie, nous cherchons à refaire l'analyse de Friedman sur les rapports NASA-TLX remplis par les participants après chaque techniques.
+Le but est de refaire l'analyse de Friedman sur l'item "frustration".
+
+
+#### 2.5.1. Organisation des données
+On charge les données et on les réorganise pour mesurer l'item "frustration".
+
+```{r nasa_load}
+# Chargement de données
+nasa = read.table("ForceEdgeStudy1NasaTLX.csv", header=TRUE, sep=",")
+
+# Trier pour n'avoir que les item frustration
+nasa = nasa %>% filter(question == "frustration")
+nasa$question = NULL
+
+# Regrouper les données de participants par participant pour chaque couple (task,technique)
+#   NOTE: c'est dégueulasse, mais ça fonctionne.....
+nasa_formatted = nasa %>% group_by(participant) %>% summarise(
+  ForceEdge_Select = sum(score[technique == "ForceEdge" & task == "Select"]),
+  Baseline_Select = sum(score[technique == "Baseline" & task == "Select"]),
+  ForceEdge_Move = sum(score[technique == "ForceEdge" & task == "Move"]),
+  Baseline_Move = sum(score[technique == "Baseline" & task == "Move"]),
+)
+```
+
+- On peut maintenant afficher les données formatées pour lancer le test
+```{r nasa_load_display}
+kable(nasa_formatted)
+```
+
+
+#### 2.5.2. Test
+On lance ici le test de Friedman.
+
+```{r nasa_test}
+nasa_formatted$participant = NULL
+pander(friedman.test(data.matrix(nasa_formatted)))
+```
+
+On observe un impact significatif de la tâche et de la technique sur l'évaluation de la frustration ($p < 0.0001$).

@@ -1,0 +1,31 @@
+---
+title: "Chi-squared test"
+author: "Gery Casiez"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(knitr)
+library(pander)
+```
+
+## Chi-squared test
+
+Analysis of preferred device with two groups of participants
+
+## Load data
+
+```{r readdata}
+data = read.table("preferenceMouseTouchScreen.csv", header=TRUE, sep=",")
+kable(data)
+```
+
+## Chi-squared test
+
+```{r ttest}
+d2 = data.frame(data$mouse, data$touchscreen)
+pander(chisq.test(d2, correct=FALSE))
+```
+
+

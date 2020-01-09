@@ -1,0 +1,86 @@
+---
+title: "Factorial ANOVA"
+author: "Gery Casiez"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(knitr)
+library(apa)
+```
+
+## Factorial ANOVA using 2 factors
+
+Between-subject design 
+Factor 1: text entry method (standard word-processing software, text entry using word-prediction software, text entry using speech-based dictation software)
+Factor 2: task (transcription, composition)
+
+## Load data
+
+```{r readdata}
+data = read.table("wordProcessingSoftwareBetweenSubjectFactorialANOVA2factors.csv", header=TRUE, sep=",")
+kable(data)
+```
+
+
+Convert data using the long format
+```{r convertlong, results="hide", message=FALSE}
+library("reshape")
+data.long = melt(data, id = c("participant","textmethod","task","time"))
+```
+
+Indicate what are the independent variables (factors)
+```{r indepvar, results="hide"}
+data.long$textmethod = factor(data.long$textmethod)
+data.long$task = factor(data.long$task)
+```
+
+## ANOVA
+```{r anova}
+library("ez")
+kable(anova_apa(ezANOVA(data.long, dv=.(time), wid=.(participant), between=.(textmethod,task), detailed=TRUE)))
+```
+
+## Plot
+
+
+```{r plottask}
+library(dplyr)
+library(gmodels)
+library(ggplot2)
+
+plot_data = data %>%  group_by(task) %>% summarise(meanTime = mean(time), ci.lower = ci(time)["CI lower"], ci.upper = ci(time)["CI upper"])
+ggplot(plot_data, aes(x = factor(task), y = meanTime)) +
+      geom_bar(stat="identity") +
+      geom_errorbar(aes(ymin = ci.lower, ymax = ci.upper), width = .1, position = position_dodge(.05)) +
+      theme(panel.background = element_blank(),
+            panel.border = element_rect(colour = 'black', fill=NA),
+            panel.grid.major.y = element_line( size = .1, color = "grey")
+            ) +
+      labs(title = "", x = "Task", y = "Time")
+
+```
+
+```{r plot}
+
+plot_data = data %>%  group_by(textmethod) %>% summarise(meanTime = mean(time), ci.lower = ci(time)["CI lower"], ci.upper = ci(time)["CI upper"])
+ggplot(plot_data, aes(x = factor(textmethod), y = meanTime)) +
+      geom_bar(stat="identity") +
+      geom_errorbar(aes(ymin = ci.lower, ymax = ci.upper), width = .1, position = position_dodge(.05)) +
+      theme(panel.background = element_blank(),
+            panel.border = element_rect(colour = 'black', fill=NA),
+            panel.grid.major.y = element_line( size = .1, color = "grey")
+            ) +
+      labs(title = "", x = "Text method", y = "Time")
+
+```
+
+## Pairwise comparisons
+
+```{r posthoc}
+attach(data.long)
+pw <- pairwise.t.test(time, factor(textmethod), paired=F, p.adj = "bonferroni")
+detach(data.long)
+kable(pw$p.value)
+```

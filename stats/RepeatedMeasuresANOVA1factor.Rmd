@@ -1,0 +1,42 @@
+---
+title: "Repeated Measures ANOVA"
+author: "Gery Casiez"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(knitr)
+library(apa)
+```
+
+## Repeated Measures ANOVA
+
+Within-subject design on text entry using standard word-processing software, text entry using word-prediction software, and text entry using speech-based dictation software.
+
+## Load data
+
+```{r readdata}
+data = read.table("wordProcessingSoftwareWithinSubjectRepeatedMeasuresANOVA1factor.csv", header=TRUE, sep=",")
+kable(data)
+```
+
+
+Convert data using the long format
+```{r convertlong, results="hide", message=FALSE}
+library("reshape")
+data.long = melt(data, id = c("participant","textmethod","time"))
+```
+
+Indicate what are the independent variables (factors)
+```{r indepvar, results="hide"}
+data.long$textmethod = factor(data.long$textmethod)
+```
+
+## ANOVA
+```{r anova}
+library("ez")
+kable(anova_apa(ezANOVA(data.long, dv=.(time), wid=.(participant), within=.(textmethod), detailed=TRUE)))
+```
+
+

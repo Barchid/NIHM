@@ -1,0 +1,31 @@
+---
+title: "Mann-Whitney U test"
+author: "Gery Casiez"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(knitr)
+library(pander)
+```
+
+## Mann-Whitney U test
+
+Between group, one using traditional alphanumeric password and the other an image-based password
+Measure of the level of frustration using 7-point Likert scale
+
+## Load data
+
+```{r readdata}
+data = read.table("authenticationTechniquesBetweenSubject.csv", header=TRUE, sep=",")
+kable(data)
+```
+
+## Test
+
+```{r MUW}
+pander(wilcox.test(rating ~ technique, data=data))
+```
+
+

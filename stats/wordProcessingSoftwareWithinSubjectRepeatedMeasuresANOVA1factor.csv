@@ -1,0 +1,25 @@
+participant,textmethod,time
+1,Standard,245
+2,Standard,236
+3,Standard,321
+4,Standard,212
+5,Standard,267
+6,Standard,334
+7,Standard,287
+8,Standard,259
+1,Prediction,246
+2,Prediction,213
+3,Prediction,265
+4,Prediction,189
+5,Prediction,201
+6,Prediction,197
+7,Prediction,289
+8,Prediction,224
+1,Speech-based dictation,178
+2,Speech-based dictation,289
+3,Speech-based dictation,222
+4,Speech-based dictation,189
+5,Speech-based dictation,245
+6,Speech-based dictation,311
+7,Speech-based dictation,267
+8,Speech-based dictation,197
