@@ -78,8 +78,8 @@ kable(grouped)
 ## 2.3. Visualisation
 
 On veut maintenant montrer si le temps moyen d'un essai suivant la technique et la distance utilisée. Pour ce faire, on reproduit la figure 4 à gauche de l'article original.
-  - Le premier graphique montre le temps moyen d'un essai suivant la technique et la distance utilisée pour les tâches de "Move".
-  - Le deuxième graphique montre le temps moyen d'un essai suivant la technique et la distance utilisée pour les tâches de "Select".
+- Le premier graphique montre le temps moyen d'un essai suivant la technique et la distance utilisée pour les tâches de "Move".
+- Le deuxième graphique montre le temps moyen d'un essai suivant la technique et la distance utilisée pour les tâches de "Select".
 
 ```{r plot CI}
 
@@ -109,6 +109,7 @@ ggplot(grouped_select, aes(x = factor(distance), y = meanTime, group=technique))
 ```
 
 Avec ces deux graphiques, nous observons ici plusieurs choses :
+
 - Dans les deux tâches (Move et Select), le temps enregistré ne montre pas de différence significative entre les deux techniques lorsque la distance utilisée est la plus courte.
 - Pour la tâche de Select, on n'observe pas de différence significative entre les deux techniques (Force Edge et Baseline).
 - Dans les autres cas de figure, on observe une différence significative entre les deux techniques.
@@ -132,7 +133,14 @@ kable(anova_result$ANOVA)
 #print(anova_result$ANOVA)
 ```
 
-L'ANOVA révèle un effet d'apprentissage au vu de l'impact significatif sur le temps passé à faire la tâche ($F_{2,30} = 62.09$, $p < 0.05$).
+L'ANOVA révèle un effet d'apprentissage au vu de l'impact significatif sur le temps passé à faire la tâche ($F_{2,30} = 62.09$, $p < 0.05$). On veut maintenant identifier le block qui entraîne cet impact significatif. Pour ce faire, on exécute un post-hoc test :
+
+```{r post_hoc_anova}
+attach(successful)
+pw <- pairwise.t.test(time, factor(block), paired=T, p.adj = "bonferroni")
+detach(successful)
+print(pw$p.value)
+```
 
 #### 2.4.2. Analyse des autres variables indépendantes
 Pour éviter le biais dû à l'effet d'apprentissage, on supprime les données du premier bloc dans le but de relancer l'ANOVA et de voir les impacts significatifs pour les autres variables indépendantes.
@@ -171,6 +179,7 @@ nasa_formatted = nasa %>% group_by(participant) %>% summarise(
 ```
 
 - On peut maintenant afficher les données formatées pour lancer le test
+
 ```{r nasa_load_display}
 kable(nasa_formatted)
 ```
