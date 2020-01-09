@@ -795,6 +795,7 @@ print(pw$p.value)</code></pre>
 <pre><code>##              1            2
 ## 2 3.840816e-30           NA
 ## 3 2.380138e-45 0.0005333282</code></pre>
+<p>On observe ici un effet d’apprentissage entre le bloc 1 et les deux autres blocs.</p>
 </div>
 <div id="analyse-des-autres-variables-indépendantes" class="section level4">
 <h4>2.4.2. Analyse des autres variables indépendantes</h4>
@@ -999,7 +1000,7 @@ nasa_formatted = nasa %&gt;% group_by(participant) %&gt;% summarise(
   Baseline_Move = sum(score[technique == &quot;Baseline&quot; &amp; task == &quot;Move&quot;]),
 )</code></pre>
 <ul>
-<li>On peut maintenant afficher les données formatées pour lancer le test</li>
+<li>On peut maintenant afficher les données formatées pour lancer le test.</li>
 </ul>
 <pre class="r"><code>kable(nasa_formatted)</code></pre>
 <table>
@@ -1155,7 +1156,7 @@ pander(friedman.test(data.matrix(nasa_formatted)))</code></pre>
 </tr>
 </tbody>
 </table>
-<p>On observe un impact significatif de la tâche et de la technique sur l’évaluation de la frustration (<span class="math inline">\(p &lt; 0.0001\)</span>).</p>
+<p>On observe un impact significatif du couple (task,technique) dans la mesure de la frustration. On peut donc conclure que, pour une tâche et une technique donnée, les utilisateurs peuvent trouver l’exécution plus ou moins frustrante.</p>
 </div>
 </div>
 </div>

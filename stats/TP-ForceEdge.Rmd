@@ -142,6 +142,8 @@ detach(successful)
 print(pw$p.value)
 ```
 
+On observe ici un effet d'apprentissage entre le bloc 1 et les deux autres blocs.
+
 #### 2.4.2. Analyse des autres variables indépendantes
 Pour éviter le biais dû à l'effet d'apprentissage, on supprime les données du premier bloc dans le but de relancer l'ANOVA et de voir les impacts significatifs pour les autres variables indépendantes.
 
@@ -178,7 +180,7 @@ nasa_formatted = nasa %>% group_by(participant) %>% summarise(
 )
 ```
 
-- On peut maintenant afficher les données formatées pour lancer le test
+- On peut maintenant afficher les données formatées pour lancer le test. 
 
 ```{r nasa_load_display}
 kable(nasa_formatted)
@@ -193,4 +195,4 @@ nasa_formatted$participant = NULL
 pander(friedman.test(data.matrix(nasa_formatted)))
 ```
 
-On observe un impact significatif de la tâche et de la technique sur l'évaluation de la frustration ($p < 0.0001$).
+On observe un impact significatif du couple (task,technique) dans la mesure de la frustration. On peut donc conclure que, pour une tâche et une technique donnée, les utilisateurs peuvent trouver l'exécution plus ou moins frustrante.
